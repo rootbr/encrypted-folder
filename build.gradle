@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+    id 'pmd'
+    id "com.github.spotbugs" version "2.0.0"
+    id 'checkstyle'
+}
+
+group 'org.rootbr'
+version '0.1'
+
+repositories {
+    mavenCentral()
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.rootbr.encrypted.folder.Application'
+    }
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Version': version,
+                'Main-Class': 'org.rootbr.encrypted.folder.Application'
+    }
+    baseName = project.name + '-all'
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    with jar
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    reports.xml.enabled = false
+    reports.html.enabled = true
+}
+
+pmd {
+    ignoreFailures = true
+}
+
+spotbugsMain {
+    ignoreFailures = true
+}
+
+spotbugsTest {
+    ignoreFailures = true
+}
+
+dependencies {
+    implementation "commons-cli:commons-cli:1.4"
+    implementation "org.slf4j:slf4j-api:1.7.26"
+    implementation "ch.qos.logback:logback-classic:1.2.3"
+}
